@@ -14,6 +14,9 @@ public class Calculator {
 
     private String latestOperation = "";
 
+    private double lastOperand;
+
+    private boolean repeatOperation = false;
     /**
      * @return den aktuellen Bildschirminhalt als String
      */
@@ -34,6 +37,8 @@ public class Calculator {
         if(screen.equals("0") || latestValue == Double.parseDouble(screen)) screen = "";
 
         screen = screen + digit;
+        repeatOperation = false;
+
     }
 
     /**
@@ -48,6 +53,7 @@ public class Calculator {
         screen = "0";
         latestOperation = "";
         latestValue = 0.0;
+        repeatOperation = false;
     }
 
     /**
@@ -62,6 +68,7 @@ public class Calculator {
     public void pressBinaryOperationKey(String operation)  {
         latestValue = Double.parseDouble(screen);
         latestOperation = operation;
+        repeatOperation = false;
     }
 
     /**
@@ -95,6 +102,7 @@ public class Calculator {
      */
     public void pressDotKey() {
         if(!screen.contains(".")) screen = screen + ".";
+        repeatOperation = false;
     }
 
     /**
@@ -106,6 +114,7 @@ public class Calculator {
      */
     public void pressNegativeKey() {
         screen = screen.startsWith("-") ? screen.substring(1) : "-" + screen;
+        repeatOperation = false;
     }
 
     /**
@@ -118,16 +127,47 @@ public class Calculator {
      * und das Ergebnis direkt angezeigt.
      */
     public void pressEqualsKey() {
-        var result = switch(latestOperation) {
-            case "+" -> latestValue + Double.parseDouble(screen);
-            case "-" -> latestValue - Double.parseDouble(screen);
-            case "x" -> latestValue * Double.parseDouble(screen);
-            case "/" -> latestValue / Double.parseDouble(screen);
-            default -> throw new IllegalArgumentException();
-        };
-        screen = Double.toString(result);
-        if(screen.equals("Infinity")) screen = "Error";
-        if(screen.endsWith(".0")) screen = screen.substring(0,screen.length()-2);
-        if(screen.contains(".") && screen.length() > 11) screen = screen.substring(0, 10);
+        try {
+            double currentValue = Double.parseDouble(screen);
+
+            if (latestOperation == null) return;
+
+            if (!repeatOperation) {
+                lastOperand = currentValue;
+                repeatOperation = true;
+            }
+
+            double result = switch (latestOperation) {
+                case "+" -> latestValue + lastOperand;
+                case "-" -> latestValue - lastOperand;
+                case "x" -> latestValue * lastOperand;
+                case "/" -> {
+                    if (lastOperand == 0) {
+                        yield Double.NaN;
+                    }
+                    yield latestValue / lastOperand;
+                }
+                default -> throw new IllegalArgumentException("Unknown operation: " + latestOperation);
+            };
+
+            if (Double.isNaN(result) || Double.isInfinite(result)) {
+                screen = "Error";
+            } else {
+                if (result == (long) result) {
+                    screen = String.valueOf((long) result);
+                } else {
+                    screen = String.valueOf(result);
+                }
+            }
+            latestValue = result;
+
+        } catch (Exception e) {
+            screen = "Error";
+        }
     }
-}
+    }
+
+
+
+
+
