@@ -123,10 +123,30 @@ class CalculatorTest {
 
         assertEquals(expected, actual);
     }
+    @Test
+    @DisplayName("should clear only the screen")
+    void testClearkey() {
+        Calculator calc = new Calculator();
+
+        calc.pressDigitKey(6);
+        calc.pressBinaryOperationKey("-");
+        calc.pressDigitKey(6);
+        calc.pressClearKey();
+        calc.pressDigitKey(3);
+
+        String expected = "3";
+        String actual = calc.readScreen();
+
+        assertEquals(expected, actual);
+    }
+    }
 
 
 
-        }
+
+
+
+
 
 
 
