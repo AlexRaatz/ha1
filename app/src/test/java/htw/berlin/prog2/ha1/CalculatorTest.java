@@ -109,6 +109,24 @@ class CalculatorTest {
     assertEquals(expected, actual);
     }
 
+    @Test
+    void shouldRepeatLastOperationOnMultipleEqualsPresses() {
+        Calculator calc = new Calculator();
+        calc.pressDigitKey(2);
+        calc.pressBinaryOperationKey("+");
+        calc.pressDigitKey(3);
+        calc.pressEqualsKey();
+        calc.pressEqualsKey();
 
-}
+        String expected = "8";
+        String actual = calc.readScreen();
+
+        assertEquals(expected, actual);
+    }
+
+
+
+        }
+
+
 
